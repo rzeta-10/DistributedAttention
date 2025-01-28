@@ -38,8 +38,50 @@ vector<vector<double>> matrixTranspose(vector<vector<double>>& a){
     }
     return b;
 }
+vector<vector<double>> read_data(string filename, int sequence_length, int embed_dim) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "File not found!" << endl;
+        return {};
+    }
+    vector<vector<double>> data;
+    string line;
+    int expected_dim = sequence_length * embed_dim;
+    while (getline(file, line)) {
+        stringstream ss(line);
+        vector<double> vec(embed_dim, 0);
+        for (int i = 0; i < embed_dim; i++) {
+            ss >> vec[i];
+        }
+        if(vec.size() != embed_dim){
+            cout << "Mismatch in sample size. Skipping sample" << endl;
+            continue;
+        }
+        data.push_back(vec);
+    }
+    return data;
+}
 
 int main() {
+
+    // transformer parameters
+    int d_model = 100;
+    int embed_dim = 100;
+    int sequence_length = 20;
+    int num_heads = 10;
+    int ff_dim = 256;
+
+    string input_file = "dataset_vectors.txt";
+
+    cout << "Loading the data from the file..." << endl;
+
+    vector<vector<double>> input_vectors = read_data(input_file, sequence_length, embed_dim);
+    if(input_vectors.empty()){
+        cout << "No data found in the file. Exiting..." << endl;
+        return 1;
+    }
+    cout << "Data read successfully!" << endl;
+
     vector<vector<double>> a = {{1, 2}, {3, 4}};
     vector<vector<double>> b = {{5, 6}, {7, 8}};
     vector<vector<double>> b_T = matrixTranspose(b);
