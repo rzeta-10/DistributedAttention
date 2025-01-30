@@ -1,25 +1,25 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-vector<vector<double>> concatenate_heads(vector<vector<double>>&, int, int, int);
+vector<vector<double>> concatenate_heads(vector<vector<double>>&, size_t, size_t, size_t);
 void add_bias(vector<vector<double>>&, vector<double>&);
-vector<vector<double>> genRandomMatrix(int, int);
-vector<vector<double>> split_heads(vector<vector<double>>&, int, int);
+vector<vector<double>> genRandomMatrix(size_t, size_t);
+vector<vector<double>> split_heads(vector<vector<double>>&, size_t, size_t);
 vector<vector<double>> matmul(vector<vector<double>>&, vector<vector<double>>&);
 void softmax_rows(vector<vector<double>>&);
 vector<vector<double>> softmax(vector<vector<double>>&);
 vector<vector<double>> matrixTranspose(vector<vector<double>>&);
-vector<vector<double>> read_data(string, int, int);
-vector<vector<double>> get_positional_encoding(int, int);
+vector<vector<double>> read_data(string, size_t, size_t);
+vector<vector<double>> get_positional_encoding(size_t, size_t);
 vector<vector<double>> add_vectors(vector<vector<double>>&, vector<vector<double>>&);
 vector<vector<double>> layer_norm(vector<vector<float>>&, vector<float>&, vector<float>&, float);
 
 class MultiHeadAttention {
     public:
-        int d_model, num_heads, d_key, d_value;
+        size_t d_model, num_heads, d_key, d_value;
         vector<vector<double>> WQ, WK, WV, WO;
 
-        MultiHeadAttention(int d_model, int num_heads) : d_model(d_model), num_heads(num_heads) {
+        MultiHeadAttention(size_t d_model, size_t num_heads) : d_model(d_model), num_heads(num_heads) {
             assert(d_model % num_heads == 0);
             this->d_model = d_model;
             this->num_heads = num_heads;
@@ -32,7 +32,7 @@ class MultiHeadAttention {
         }
 
         vector<vector<double>> forward(vector<vector<double>>& x) {
-            int seq_len = x.size();
+            size_t seq_len = x.size();
 
             vector<vector<double>> Q = matmul(x, WQ);
             vector<vector<double>> K = matmul(x, WK);
@@ -44,10 +44,10 @@ class MultiHeadAttention {
 
             vector<vector<double>> attention_heads(num_heads * seq_len);
 
-            for (int i = 0; i < num_heads; i++) {
+            for (size_t i = 0; i < num_heads; i++) {
                 vector<vector<double>> Q_head(seq_len), K_head(seq_len), V_head(seq_len);
 
-                for (int j = 0; j < seq_len; j++) {
+                for (size_t j = 0; j < seq_len; j++) {
                     Q_head[j] = Q_heads[i * seq_len + j];
                     K_head[j] = K_heads[i * seq_len + j];
                     V_head[j] = V_heads[i * seq_len + j];
@@ -67,7 +67,7 @@ class MultiHeadAttention {
 
                 vector<vector<double>> attention_output = matmul(attention_scores, V_head);
 
-                for (int j = 0; j < seq_len; j++) {
+                for (size_t j = 0; j < seq_len; j++) {
                     attention_heads[i * seq_len + j] = move(attention_output[j]);
                 }
             }
@@ -82,11 +82,11 @@ class MultiHeadAttention {
 
 class FeedForward {
     public:
-        int d_model, ff_dim;
+        size_t d_model, ff_dim;
         vector<vector<double>> W1, W2;
         vector<double> b1, b2;
 
-        FeedForward(int d_model, int ff_dim) : d_model(d_model), ff_dim(ff_dim) {
+        FeedForward(size_t d_model, size_t ff_dim) : d_model(d_model), ff_dim(ff_dim) {
             this->W1 = genRandomMatrix(d_model, ff_dim);
             this->b1 = vector<double>(ff_dim, 0.0f);
             this->W2 = genRandomMatrix(ff_dim, d_model);
@@ -113,11 +113,11 @@ class FeedForward {
         }
 };
 
-vector<vector<double>> concatenate_heads(vector<vector<double>>& x, int num_heads, int seq_len, int d_value) {
+vector<vector<double>> concatenate_heads(vector<vector<double>>& x, size_t num_heads, size_t seq_len, size_t d_value) {
     vector<vector<double>> X(seq_len, vector<double>(num_heads * d_value, 0.0f));
-    for (int i = 0; i < num_heads; i++) {
-        for (int j = 0; j < seq_len; j++) {
-            for (int k = 0; k < d_value; k++) {
+    for (size_t i = 0; i < num_heads; i++) {
+        for (size_t j = 0; j < seq_len; j++) {
+            for (size_t k = 0; k < d_value; k++) {
                 X[j][i * d_value + k] = x[i * seq_len + j][k];
             }
         }
@@ -128,30 +128,30 @@ vector<vector<double>> concatenate_heads(vector<vector<double>>& x, int num_head
 void add_bias(vector<vector<double>>& x, vector<double>& b) {
     assert(x[0].size() == b.size());
     for (auto& row : x) {
-        for (int i = 0; i < row.size(); i++) {
+        for (size_t i = 0; i < row.size(); i++) {
             row[i] += b[i];
         }
     }
 }
 
-vector<vector<double>> genRandomMatrix(int rows, int cols) {
+vector<vector<double>> genRandomMatrix(size_t rows, size_t cols) {
     vector<vector<double>> matrix(rows, vector<double>(cols, 0.0f));
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
             matrix[i][j] = (double)rand() / RAND_MAX;
         }
     }
     return matrix;
 }
 
-vector<vector<double>> split_heads(vector<vector<double>>& x, int num_heads, int d_head) {
-    int seq_len = x.size();
-    int d_model = x[0].size();
+vector<vector<double>> split_heads(vector<vector<double>>& x, size_t num_heads, size_t d_head) {
+    size_t seq_len = x.size();
+    size_t d_model = x[0].size();
     vector<vector<double>> X_split(seq_len * num_heads, vector<double>(d_head, 0.0f));
 
-    for (int h = 0; h < num_heads; ++h) {
-        for (int i = 0; i < seq_len; ++i) {
-            for (int j = 0; j < d_head; ++j) {
+    for (size_t h = 0; h < num_heads; ++h) {
+        for (size_t i = 0; i < seq_len; ++i) {
+            for (size_t j = 0; j < d_head; ++j) {
                 X_split[h * seq_len + i][j] = x[i][h * d_head + j];
             }
         }
@@ -160,11 +160,11 @@ vector<vector<double>> split_heads(vector<vector<double>>& x, int num_heads, int
 }
 
 vector<vector<double>> matmul(vector<vector<double>>& a, vector<vector<double>>& b) {
-    int n = a.size(), m = a[0].size(), p = b[0].size();
+    size_t n = a.size(), m = a[0].size(), p = b[0].size();
     vector<vector<double>> c(n, vector<double>(p, 0));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < p; j++) {
-            for (int k = 0; k < m; k++) {
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = 0; j < p; j++) {
+            for (size_t k = 0; k < m; k++) {
                 c[i][j] += a[i][k] * b[k][j];
             }
         }
@@ -203,15 +203,15 @@ vector<vector<double>> softmax(vector<vector<double>>& a){
 
 vector<vector<double>> matrixTranspose(vector<vector<double>>& a){
     vector<vector<double>> b(a[0].size(), vector<double>(a.size(), 0));
-    for (int i = 0; i < a.size(); i++) {
-        for (int j = 0; j < a[0].size(); j++) {
+    for (size_t i = 0; i < a.size(); i++) {
+        for (size_t j = 0; j < a[0].size(); j++) {
             b[j][i] = a[i][j];
         }
     }
     return b;
 }
 
-vector<vector<double>> read_data(string filename, int sequence_length, int embed_dim) {
+vector<vector<double>> read_data(string filename, size_t sequence_length, size_t embed_dim) {
     ifstream file(filename);
     if (!file.is_open()) {
         cout << "File not found!" << endl;
@@ -222,7 +222,7 @@ vector<vector<double>> read_data(string filename, int sequence_length, int embed
     while (getline(file, line)) {
         stringstream ss(line);
         vector<double> vec(embed_dim, 0);
-        for (int i = 0; i < embed_dim; i++) {
+        for (size_t i = 0; i < embed_dim; i++) {
             ss >> vec[i];
         }
         if(vec.size() != embed_dim){
@@ -234,10 +234,10 @@ vector<vector<double>> read_data(string filename, int sequence_length, int embed
     return data;
 }
 
-vector<vector<double>> get_positional_encoding(int sequence_length, int d_model) {
+vector<vector<double>> get_positional_encoding(size_t sequence_length, size_t d_model) {
     vector<vector<double>> positional_encodings(sequence_length, vector<double>(d_model, 0.0f));
-    for (int pos = 0; pos < sequence_length; pos++) {
-        for (int i = 0; i < d_model; i++) {
+    for (size_t pos = 0; pos < sequence_length; pos++) {
+        for (size_t i = 0; i < d_model; i++) {
             if (i % 2 == 0) {
                 positional_encodings[pos][i] = sin(pos / pow(10000, (double)i / d_model));
             } else {
@@ -250,8 +250,8 @@ vector<vector<double>> get_positional_encoding(int sequence_length, int d_model)
 
 vector<vector<double>> add_vectors(vector<vector<double>>& a, vector<vector<double>>& b) {
     vector<vector<double>> c(a.size(), vector<double>(a[0].size(), 0.0f));
-    for (int i = 0; i < a.size(); i++) {
-        for (int j = 0; j < a[0].size(); j++) {
+    for (size_t i = 0; i < a.size(); i++) {
+        for (size_t j = 0; j < a[0].size(); j++) {
             c[i][j] = a[i][j] + b[i][j];
         }
     }
@@ -259,11 +259,11 @@ vector<vector<double>> add_vectors(vector<vector<double>>& a, vector<vector<doub
 }
 
 vector<vector<double>> layer_norm(vector<vector<double>>& input, vector<double>& gamma, vector<double>& beta, float epsilon = 1e-6) {
-    int seq_len = input.size();
-    int dim = input[0].size();
+    size_t seq_len = input.size();
+    size_t dim = input[0].size();
     vector<vector<double>> output(seq_len, vector<double>(dim, 0.0f));
 
-    for (int i = 0; i < seq_len; ++i) {
+    for (size_t i = 0; i < seq_len; ++i) {
         double mean = 0.0f;
         for (auto val : input[i]) mean += val;
         mean /= dim;
@@ -272,7 +272,7 @@ vector<vector<double>> layer_norm(vector<vector<double>>& input, vector<double>&
         for (double val : input[i]) var += (val - mean) * (val - mean);
         var /= dim;
 
-        for (int j = 0; j < dim; ++j) {
+        for (size_t j = 0; j < dim; ++j) {
             output[i][j] = gamma[j] * ((input[i][j] - mean) / sqrt(var + epsilon)) + beta[j];
         }
     }
@@ -281,9 +281,9 @@ vector<vector<double>> layer_norm(vector<vector<double>>& input, vector<double>&
 
 class EncoderLayer {
     public:
-        int d_model;
-        int num_heads;
-        int ff_d;
+        size_t d_model;
+        size_t num_heads;
+        size_t ff_d;
 
         MultiHeadAttention mha;
         FeedForward ff;
@@ -291,7 +291,7 @@ class EncoderLayer {
         vector<double> beta;
         vector<double> gamma;
         
-        EncoderLayer(int d_model, int num_heads, int ff_d) : d_model(d_model), num_heads(num_heads), ff_d(ff_d), mha(d_model, num_heads), ff(d_model, ff_d) {
+        EncoderLayer(size_t d_model, size_t num_heads, size_t ff_d) : d_model(d_model), num_heads(num_heads), ff_d(ff_d), mha(d_model, num_heads), ff(d_model, ff_d) {
             beta = vector<double>(d_model, 0.0f);
             gamma = vector<double>(d_model, 1.0f);
         }
@@ -314,11 +314,11 @@ class EncoderLayer {
 int main() {
 
     // transformer parameters
-    int d_model = 100;
-    int embed_dim = 100;
-    int sequence_length = 20;
-    int num_heads = 10;
-    int ff_dim = 256;
+    size_t d_model = 500;
+    size_t embed_dim = 500;
+    size_t sequence_length = 100;
+    size_t num_heads = 50;
+    size_t ff_dim = 1280;
 
     string input_file = "dataset_vectors.txt";
 
@@ -334,16 +334,16 @@ int main() {
     vector<double> sample = input_vectors[0];
     vector<vector<double>> sample_vector(sequence_length, vector<double>(embed_dim, 0.0f));
 
-    for(int i = 0; i< sequence_length; i++){
-        for(int j = 0; j < embed_dim; j++){
+    for(size_t i = 0; i< sequence_length; i++){
+        for(size_t j = 0; j < embed_dim; j++){
             sample_vector[i][j] = sample[i*embed_dim + j];
         }
     }
 
     vector<vector<double>> positional_encodings = get_positional_encoding(sequence_length, d_model);
     
-    for(int i = 0; i < sequence_length; i++){
-        for(int j = 0; j < d_model; j++){
+    for(size_t i = 0; i < sequence_length; i++){
+        for(size_t j = 0; j < d_model; j++){
             sample_vector[i][j] += positional_encodings[i][j];
         }
     }

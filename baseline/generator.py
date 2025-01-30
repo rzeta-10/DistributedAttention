@@ -1,9 +1,9 @@
 import numpy as np
 
 # Parameters
-num_samples = 1000  # Number of samples in the dataset
-sequence_length = 20  # Sequence length
-embedding_dim = 100  # Embedding dimension
+num_samples = 1000 # Number of samples in the dataset
+sequence_length = 100  # Sequence length
+embedding_dim = 500  # Embedding dimension
 output_file = "dataset_vectors.txt"  # Output file name
 
 # Generate random data
