@@ -11,6 +11,8 @@ vector<vector<double>> softmax(vector<vector<double>>&);
 vector<vector<double>> matrixTranspose(vector<vector<double>>&);
 vector<vector<double>> read_data(string, int, int);
 vector<vector<double>> get_positional_encoding(int, int);
+vector<vector<double>> add_vectors(vector<vector<double>>&, vector<vector<double>>&);
+vector<vector<double>> layer_norm(vector<vector<float>>&, vector<float>&, vector<float>&, float);
 
 class MultiHeadAttention {
     public:
@@ -40,19 +42,15 @@ class MultiHeadAttention {
             vector<vector<double>> K_heads = split_heads(K, num_heads, d_key);
             vector<vector<double>> V_heads = split_heads(V, num_heads, d_value);
 
-            vector<vector<double>> attention_heads;
-            attention_heads.reserve(num_heads * seq_len);
+            vector<vector<double>> attention_heads(num_heads * seq_len);
 
             for (int i = 0; i < num_heads; i++) {
-                vector<vector<double>> Q_head, K_head, V_head;
-                Q_head.reserve(seq_len);
-                K_head.reserve(seq_len);
-                V_head.reserve(seq_len);
+                vector<vector<double>> Q_head(seq_len), K_head(seq_len), V_head(seq_len);
 
-                for (int i = 0; i < seq_len; i++) {
-                    Q_head.push_back(Q_heads[i * num_heads + i]);
-                    K_head.push_back(K_heads[i * num_heads + i]);
-                    V_head.push_back(V_heads[i * num_heads + i]);
+                for (int j = 0; j < seq_len; j++) {
+                    Q_head[j] = Q_heads[i * seq_len + j];
+                    K_head[j] = K_heads[i * seq_len + j];
+                    V_head[j] = V_heads[i * seq_len + j];
                 }
 
                 vector<vector<double>> K_head_T = matrixTranspose(K_head);
@@ -69,8 +67,8 @@ class MultiHeadAttention {
 
                 vector<vector<double>> attention_output = matmul(attention_scores, V_head);
 
-                for (int i = 0; i < seq_len; i++) {
-                    attention_heads.emplace_back(attention_output[i]);
+                for (int j = 0; j < seq_len; j++) {
+                    attention_heads[i * seq_len + j] = move(attention_output[j]);
                 }
             }
 
@@ -106,6 +104,8 @@ class FeedForward {
                     val = max(0.0, val);
                 }
             }
+
+            // Layer 2
             vector<vector<double>> h2 = matmul(h1, W2);
             add_bias(h2, b2);
 
@@ -219,7 +219,6 @@ vector<vector<double>> read_data(string filename, int sequence_length, int embed
     }
     vector<vector<double>> data;
     string line;
-    int expected_dim = sequence_length * embed_dim;
     while (getline(file, line)) {
         stringstream ss(line);
         vector<double> vec(embed_dim, 0);
@@ -230,7 +229,7 @@ vector<vector<double>> read_data(string filename, int sequence_length, int embed
             cout << "Mismatch in sample size. Skipping sample" << endl;
             continue;
         }
-        data.push_back(vec);
+        data.push_back(move(vec)); // Use move to avoid copying
     }
     return data;
 }
@@ -249,17 +248,66 @@ vector<vector<double>> get_positional_encoding(int sequence_length, int d_model)
     return positional_encodings;
 }
 
+vector<vector<double>> add_vectors(vector<vector<double>>& a, vector<vector<double>>& b) {
+    vector<vector<double>> c(a.size(), vector<double>(a[0].size(), 0.0f));
+    for (int i = 0; i < a.size(); i++) {
+        for (int j = 0; j < a[0].size(); j++) {
+            c[i][j] = a[i][j] + b[i][j];
+        }
+    }
+    return c;
+}
+
+vector<vector<double>> layer_norm(vector<vector<double>>& input, vector<double>& gamma, vector<double>& beta, float epsilon = 1e-6) {
+    int seq_len = input.size();
+    int dim = input[0].size();
+    vector<vector<double>> output(seq_len, vector<double>(dim, 0.0f));
+
+    for (int i = 0; i < seq_len; ++i) {
+        double mean = 0.0f;
+        for (auto val : input[i]) mean += val;
+        mean /= dim;
+
+        double var = 0.0f;
+        for (double val : input[i]) var += (val - mean) * (val - mean);
+        var /= dim;
+
+        for (int j = 0; j < dim; ++j) {
+            output[i][j] = gamma[j] * ((input[i][j] - mean) / sqrt(var + epsilon)) + beta[j];
+        }
+    }
+    return output;
+}
+
 class EncoderLayer {
     public:
+        int d_model;
+        int num_heads;
+        int ff_d;
+
         MultiHeadAttention mha;
         FeedForward ff;
-
-        EncoderLayer(int d_model, int num_heads, int ff_dim) : mha(d_model, num_heads), ff(d_model, ff_dim) {}
+        
+        vector<double> beta;
+        vector<double> gamma;
+        
+        EncoderLayer(int d_model, int num_heads, int ff_d) : d_model(d_model), num_heads(num_heads), ff_d(ff_d), mha(d_model, num_heads), ff(d_model, ff_d) {
+            beta = vector<double>(d_model, 0.0f);
+            gamma = vector<double>(d_model, 1.0f);
+        }
 
         vector<vector<double>> forward(vector<vector<double>>& x) {
             vector<vector<double>> attn_output = mha.forward(x);
-            vector<vector<double>> ff_output = ff.forward(attn_output);
-            return ff_output;
+
+            vector<vector<double>> addLayer1 = add_vectors(x, attn_output);
+            vector<vector<double>> norm1 = layer_norm(addLayer1, gamma, beta, 1e-6);
+
+            vector<vector<double>> ff_output = ff.forward(norm1);
+
+            vector<vector<double>> addLayer2 = add_vectors(norm1, ff_output);
+            vector<vector<double>> norm2 = layer_norm(addLayer2, gamma, beta);
+
+            return norm2;
         }
 };
 
@@ -303,19 +351,12 @@ int main() {
     EncoderLayer encoder_layer(d_model, num_heads, ff_dim);
     vector<vector<double>> encoder_output = encoder_layer.forward(sample_vector);
 
-    vector<vector<double>> a = {{1, 2}, {3, 4}};
-    vector<vector<double>> b = {{5, 6}, {7, 8}};
-    vector<vector<double>> b_T = matrixTranspose(b);
-    vector<vector<double>> c = matmul(a, b_T);
-    for (int i = 0; i < c.size(); i++) {
-        for (int j = 0; j < c[0].size(); j++) {
-            cout << c[i][j] / sqrt(2) << " ";
-        }
-        cout << endl;
-    }
-    vector<vector<double>> softmax_result = softmax(c);
-    for (const auto& row : softmax_result) {
-        for (const auto& val : row) {
+    cout << "Output after input data is passed through the transformer : " << endl;
+    ofstream outputFile("output.txt");
+
+    for(auto row : encoder_output){
+        for(auto val : row){
+            outputFile << val << " ";
             cout << val << " ";
         }
         cout << endl;
