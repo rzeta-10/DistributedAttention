@@ -1,10 +1,10 @@
-        -:    0:Source:/usr/include/c++/13/new
+        -:    0:Source:/usr/include/c++/11/new
         -:    0:Graph:transformer.gcno
         -:    0:Data:transformer.gcda
         -:    0:Runs:1
         -:    1:// The -*- C++ -*- dynamic memory management header.
         -:    2:
-        -:    3:// Copyright (C) 1994-2023 Free Software Foundation, Inc.
+        -:    3:// Copyright (C) 1994-2021 Free Software Foundation, Inc.
         -:    4:
         -:    5:// This file is part of GCC.
         -:    6://
@@ -175,9 +175,9 @@
         -:  171:#endif // __cpp_aligned_new
         -:  172:
         -:  173:// Default placement versions of operator new.
-function _ZnwmPv called 52603 returned 100% blocks executed 100%
-    52603:  174:_GLIBCXX_NODISCARD inline void* operator new(std::size_t, void* __p) _GLIBCXX_USE_NOEXCEPT
-    52603:  175:{ return __p; }
+function _ZnwmPv called 50807 returned 100% blocks executed 100%
+    50807:  174:_GLIBCXX_NODISCARD inline void* operator new(std::size_t, void* __p) _GLIBCXX_USE_NOEXCEPT
+    50807:  175:{ return __p; }
         -:  176:_GLIBCXX_NODISCARD inline void* operator new[](std::size_t, void* __p) _GLIBCXX_USE_NOEXCEPT
         -:  177:{ return __p; }
         -:  178:
@@ -189,10 +189,10 @@ function _ZdlPvS_ called 0 returned 0% blocks executed 0%
         -:  183:} // extern "C++"
         -:  184:
         -:  185:#if __cplusplus >= 201703L
-        -:  186:namespace std
-        -:  187:{
-        -:  188:#ifdef _GLIBCXX_HAVE_BUILTIN_LAUNDER
-        -:  189:#define __cpp_lib_launder 201606L
+        -:  186:#ifdef _GLIBCXX_HAVE_BUILTIN_LAUNDER
+        -:  187:namespace std
+        -:  188:{
+        -:  189:#define __cpp_lib_launder 201606
         -:  190:  /// Pointer optimization barrier [ptr.launder]
         -:  191:  template<typename _Tp>
         -:  192:    [[nodiscard]] constexpr _Tp*
@@ -211,34 +211,28 @@ function _ZdlPvS_ called 0 returned 0% blocks executed 0%
         -:  205:  void launder(const void*) = delete;
         -:  206:  void launder(volatile void*) = delete;
         -:  207:  void launder(const volatile void*) = delete;
-        -:  208:#endif // _GLIBCXX_HAVE_BUILTIN_LAUNDER
-        -:  209:
-        -:  210:#ifdef __GCC_DESTRUCTIVE_SIZE
-        -:  211:# define __cpp_lib_hardware_interference_size 201703L
-        -:  212:  inline constexpr size_t hardware_destructive_interference_size = __GCC_DESTRUCTIVE_SIZE;
-        -:  213:  inline constexpr size_t hardware_constructive_interference_size = __GCC_CONSTRUCTIVE_SIZE;
-        -:  214:#endif // __GCC_DESTRUCTIVE_SIZE
-        -:  215:}
-        -:  216:#endif // C++17
-        -:  217:
-        -:  218:#if __cplusplus > 201703L
-        -:  219:namespace std
-        -:  220:{
-        -:  221:  /// Tag type used to declare a class-specific operator delete that can
-        -:  222:  /// invoke the destructor before deallocating the memory.
-        -:  223:  struct destroying_delete_t
-        -:  224:  {
-        -:  225:    explicit destroying_delete_t() = default;
-        -:  226:  };
-        -:  227:  /// Tag variable of type destroying_delete_t.
-        -:  228:  inline constexpr destroying_delete_t destroying_delete{};
-        -:  229:}
-        -:  230:// Only define the feature test macro if the compiler supports the feature:
-        -:  231:#if __cpp_impl_destroying_delete
-        -:  232:# define __cpp_lib_destroying_delete 201806L
-        -:  233:#endif
-        -:  234:#endif // C++20
-        -:  235:
-        -:  236:#pragma GCC visibility pop
-        -:  237:
-        -:  238:#endif
+        -:  208:}
+        -:  209:#endif // _GLIBCXX_HAVE_BUILTIN_LAUNDER
+        -:  210:#endif // C++17
+        -:  211:
+        -:  212:#if __cplusplus > 201703L
+        -:  213:namespace std
+        -:  214:{
+        -:  215:  /// Tag type used to declare a class-specific operator delete that can
+        -:  216:  /// invoke the destructor before deallocating the memory.
+        -:  217:  struct destroying_delete_t
+        -:  218:  {
+        -:  219:    explicit destroying_delete_t() = default;
+        -:  220:  };
+        -:  221:  /// Tag variable of type destroying_delete_t.
+        -:  222:  inline constexpr destroying_delete_t destroying_delete{};
+        -:  223:}
+        -:  224:// Only define the feature test macro if the compiler supports the feature:
+        -:  225:#if __cpp_impl_destroying_delete
+        -:  226:# define __cpp_lib_destroying_delete 201806L
+        -:  227:#endif
+        -:  228:#endif // C++20
+        -:  229:
+        -:  230:#pragma GCC visibility pop
+        -:  231:
+        -:  232:#endif

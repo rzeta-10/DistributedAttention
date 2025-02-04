@@ -1,0 +1,1124 @@
+        -:    0:Source:transformer.cpp
+        -:    0:Graph:transformer.gcno
+        -:    0:Data:transformer.gcda
+        -:    0:Runs:0
+        -:    1:#include <bits/stdc++.h>
+        -:    2:using namespace std;
+        -:    3:
+        -:    4:vector<vector<double>> concatenate_heads(vector<vector<double>>&, size_t, size_t, size_t);
+        -:    5:void add_bias(vector<vector<double>>&, vector<double>&);
+        -:    6:vector<vector<double>> genRandomMatrix(size_t, size_t);
+        -:    7:vector<vector<double>> split_heads(vector<vector<double>>&, size_t, size_t);
+        -:    8:vector<vector<double>> matmul(vector<vector<double>>&, vector<vector<double>>&);
+        -:    9:void softmax_rows(vector<vector<double>>&);
+        -:   10:vector<vector<double>> softmax(vector<vector<double>>&);
+        -:   11:vector<vector<double>> matrixTranspose(vector<vector<double>>&);
+        -:   12:vector<vector<double>> read_data(string, size_t, size_t);
+        -:   13:vector<vector<double>> get_positional_encoding(size_t, size_t);
+        -:   14:vector<vector<double>> add_vectors(vector<vector<double>>&, vector<vector<double>>&);
+        -:   15:vector<vector<double>> layer_norm(vector<vector<float>>&, vector<float>&, vector<float>&, float);
+        -:   16:
+        -:   17:class MultiHeadAttention {
+        -:   18:    public:
+        -:   19:        size_t d_model, num_heads, d_key, d_value;
+        -:   20:        vector<vector<double>> WQ, WK, WV, WO;
+        -:   21:
+function _ZN18MultiHeadAttentionC2Emm called 0 returned 0% blocks executed 0%
+    #####:   22:        MultiHeadAttention(size_t d_model, size_t num_heads) : d_model(d_model), num_heads(num_heads) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+    #####:   23:            assert(d_model % num_heads == 0);
+branch  0 never executed
+branch  1 never executed
+call    2 never executed
+    #####:   24:            this->d_model = d_model;
+    #####:   25:            this->num_heads = num_heads;
+    #####:   26:            this->d_key = d_model / num_heads;
+    #####:   27:            this->d_value = d_model / num_heads;
+    #####:   28:            this->WQ = genRandomMatrix(d_model, d_model);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+    #####:   29:            this->WK = genRandomMatrix(d_model, d_model);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+    #####:   30:            this->WV = genRandomMatrix(d_model, d_model);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+    #####:   31:            this->WO = genRandomMatrix(d_model, d_model);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+    #####:   32:        }
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:   33:
+function _ZN18MultiHeadAttention7forwardERSt6vectorIS0_IdSaIdEESaIS2_EE called 0 returned 0% blocks executed 0%
+    #####:   34:        vector<vector<double>> forward(vector<vector<double>>& x) {
+    #####:   35:            size_t seq_len = x.size();
+call    0 never executed
+        -:   36:
+    #####:   37:            vector<vector<double>> Q = matmul(x, WQ);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   38:            vector<vector<double>> K = matmul(x, WK);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   39:            vector<vector<double>> V = matmul(x, WV);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   40:
+    #####:   41:            vector<vector<double>> Q_heads = split_heads(Q, num_heads, d_key);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   42:            vector<vector<double>> K_heads = split_heads(K, num_heads, d_key);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   43:            vector<vector<double>> V_heads = split_heads(V, num_heads, d_value);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   44:
+    #####:   45:            vector<vector<double>> attention_heads(num_heads * seq_len);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:   46:
+    #####:   47:            for (size_t i = 0; i < num_heads; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:   48:                vector<vector<double>> Q_head(seq_len), K_head(seq_len), V_head(seq_len);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+branch 10 never executed
+branch 11 never executed
+        -:   49:
+    #####:   50:                for (size_t j = 0; j < seq_len; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:   51:                    Q_head[j] = Q_heads[i * seq_len + j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:   52:                    K_head[j] = K_heads[i * seq_len + j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:   53:                    V_head[j] = V_heads[i * seq_len + j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+        -:   54:                }
+        -:   55:
+    #####:   56:                vector<vector<double>> K_head_T = matrixTranspose(K_head);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   57:                vector<vector<double>> attention_scores = matmul(Q_head, K_head_T);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   58:
+    #####:   59:                double scale = sqrt(d_key);
+call    0 never executed
+    #####:   60:                for (auto& row : attention_scores) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:   61:                    for (auto& val : row) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:   62:                        val /= scale;
+call    0 never executed
+        -:   63:                    }
+        -:   64:                }
+        -:   65:
+    #####:   66:                softmax_rows(attention_scores);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   67:
+    #####:   68:                vector<vector<double>> attention_output = matmul(attention_scores, V_head);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   69:
+    #####:   70:                for (size_t j = 0; j < seq_len; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:   71:                    attention_heads[i * seq_len + j] = move(attention_output[j]);
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:   72:                }
+    #####:   73:            }
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+call    8 never executed
+call    9 never executed
+call   10 never executed
+        -:   74:
+    #####:   75:            vector<vector<double>> concat = concatenate_heads(attention_heads, num_heads, seq_len, d_value);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   76:
+    #####:   77:            vector<vector<double>> output = matmul(concat, WO);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   78:
+    #####:   79:            return output;
+    #####:   80:        }
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+call    8 never executed
+call    9 never executed
+call   10 never executed
+call   11 never executed
+call   12 never executed
+call   13 never executed
+call   14 never executed
+call   15 never executed
+        -:   81:};
+        -:   82:
+        -:   83:class FeedForward {
+        -:   84:    public:
+        -:   85:        size_t d_model, ff_dim;
+        -:   86:        vector<vector<double>> W1, W2;
+        -:   87:        vector<double> b1, b2;
+        -:   88:
+function _ZN11FeedForwardC2Emm called 0 returned 0% blocks executed 0%
+    #####:   89:        FeedForward(size_t d_model, size_t ff_dim) : d_model(d_model), ff_dim(ff_dim) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+    #####:   90:            this->W1 = genRandomMatrix(d_model, ff_dim);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+    #####:   91:            this->b1 = vector<double>(ff_dim, 0.0f);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+    #####:   92:            this->W2 = genRandomMatrix(ff_dim, d_model);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+    #####:   93:            this->b2 = vector<double>(d_model, 0.0f);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+    #####:   94:        }
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:   95:
+function _ZN11FeedForward7forwardERSt6vectorIS0_IdSaIdEESaIS2_EE called 0 returned 0% blocks executed 0%
+    #####:   96:        vector<vector<double>> forward(vector<vector<double>>& x) {
+        -:   97:            // Layer 1
+    #####:   98:            vector<vector<double>> h1 = matmul(x, W1);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   99:            add_bias(h1, b1);
+call    0 never executed
+        -:  100:
+        -:  101:            // ReLU activation
+    #####:  102:            for (auto& row : h1) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  103:                for (auto& val : row) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  104:                    val = max(0.0, val);
+call    0 never executed
+call    1 never executed
+        -:  105:                }
+        -:  106:            }
+        -:  107:
+        -:  108:            // Layer 2
+    #####:  109:            vector<vector<double>> h2 = matmul(h1, W2);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  110:            add_bias(h2, b2);
+call    0 never executed
+        -:  111:
+    #####:  112:            return h2;
+    #####:  113:        }
+call    0 never executed
+call    1 never executed
+        -:  114:};
+        -:  115:
+function _Z17concatenate_headsRSt6vectorIS_IdSaIdEESaIS1_EEmmm called 0 returned 0% blocks executed 0%
+    #####:  116:vector<vector<double>> concatenate_heads(vector<vector<double>>& x, size_t num_heads, size_t seq_len, size_t d_value) {
+    #####:  117:    vector<vector<double>> X(seq_len, vector<double>(num_heads * d_value, 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+    #####:  118:    for (size_t i = 0; i < num_heads; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  119:        for (size_t j = 0; j < seq_len; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  120:            for (size_t k = 0; k < d_value; k++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  121:                X[j][i * d_value + k] = x[i * seq_len + j][k];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:  122:            }
+        -:  123:        }
+        -:  124:    }
+    #####:  125:    return X;
+        -:  126:}
+        -:  127:
+function _Z8add_biasRSt6vectorIS_IdSaIdEESaIS1_EERS1_ called 0 returned 0% blocks executed 0%
+    #####:  128:void add_bias(vector<vector<double>>& x, vector<double>& b) {
+    #####:  129:    assert(x[0].size() == b.size());
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+    #####:  130:    for (auto& row : x) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  131:        for (size_t i = 0; i < row.size(); i++) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  132:            row[i] += b[i];
+call    0 never executed
+call    1 never executed
+        -:  133:        }
+        -:  134:    }
+    #####:  135:}
+        -:  136:
+function _Z15genRandomMatrixmm called 0 returned 0% blocks executed 0%
+    #####:  137:vector<vector<double>> genRandomMatrix(size_t rows, size_t cols) {
+    #####:  138:    vector<vector<double>> matrix(rows, vector<double>(cols, 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+    #####:  139:    for (size_t i = 0; i < rows; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  140:        for (size_t j = 0; j < cols; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  141:            matrix[i][j] = (double)rand() / RAND_MAX;
+call    0 never executed
+call    1 never executed
+call    2 never executed
+        -:  142:        }
+        -:  143:    }
+    #####:  144:    return matrix;
+        -:  145:}
+        -:  146:
+function _Z11split_headsRSt6vectorIS_IdSaIdEESaIS1_EEmm called 0 returned 0% blocks executed 0%
+    #####:  147:vector<vector<double>> split_heads(vector<vector<double>>& x, size_t num_heads, size_t d_head) {
+    #####:  148:    size_t seq_len = x.size();
+call    0 never executed
+    #####:  149:    size_t d_model = x[0].size();
+call    0 never executed
+call    1 never executed
+    #####:  150:    vector<vector<double>> X_split(seq_len * num_heads, vector<double>(d_head, 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+        -:  151:
+    #####:  152:    for (size_t h = 0; h < num_heads; ++h) {
+branch  0 never executed
+branch  1 never executed
+    #####:  153:        for (size_t i = 0; i < seq_len; ++i) {
+branch  0 never executed
+branch  1 never executed
+    #####:  154:            for (size_t j = 0; j < d_head; ++j) {
+branch  0 never executed
+branch  1 never executed
+    #####:  155:                X_split[h * seq_len + i][j] = x[i][h * d_head + j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:  156:            }
+        -:  157:        }
+        -:  158:    }
+    #####:  159:    return X_split;
+        -:  160:}
+        -:  161:
+function _Z6matmulRSt6vectorIS_IdSaIdEESaIS1_EES4_ called 0 returned 0% blocks executed 0%
+    #####:  162:vector<vector<double>> matmul(vector<vector<double>>& a, vector<vector<double>>& b) {
+    #####:  163:    size_t n = a.size(), m = a[0].size(), p = b[0].size();
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+    #####:  164:    vector<vector<double>> c(n, vector<double>(p, 0));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+    #####:  165:    for (size_t i = 0; i < n; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  166:        for (size_t j = 0; j < p; j++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  167:            for (size_t k = 0; k < m; k++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  168:                c[i][j] += a[i][k] * b[k][j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+        -:  169:            }
+        -:  170:        }
+        -:  171:    }
+    #####:  172:    return c;
+        -:  173:}
+        -:  174:
+function _Z12softmax_rowsRSt6vectorIS_IdSaIdEESaIS1_EE called 0 returned 0% blocks executed 0%
+    #####:  175:void softmax_rows(vector<vector<double>>& a) {
+    #####:  176:    for (auto& row : a) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  177:        double max_val = *max_element(row.begin(), row.end());
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+    #####:  178:        double sum = 0.0f;
+    #####:  179:        for (auto& val : row) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  180:            val = exp(val - max_val);
+    #####:  181:            sum += val;
+call    0 never executed
+        -:  182:        }
+    #####:  183:        for (auto& val : row) {
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  184:            val /= sum;
+call    0 never executed
+        -:  185:        }
+        -:  186:    }
+    #####:  187:}
+        -:  188:
+function _Z7softmaxRSt6vectorIS_IdSaIdEESaIS1_EE called 0 returned 0% blocks executed 0%
+    #####:  189:vector<vector<double>> softmax(vector<vector<double>>& a){
+    #####:  190:    for(auto& row : a){
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  191:        double max_val = *max_element(row.begin(), row.end());
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+    #####:  192:        double sum = 0.0f;
+    #####:  193:        for(auto& val : row){
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  194:            val = exp(val - max_val);
+    #####:  195:            sum += val;
+call    0 never executed
+        -:  196:        }
+    #####:  197:        for(auto& val : row){
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  198:            val /= sum;
+call    0 never executed
+        -:  199:        }
+        -:  200:    }
+    #####:  201:    return a;
+call    0 never executed
+        -:  202:}
+        -:  203:
+function _Z15matrixTransposeRSt6vectorIS_IdSaIdEESaIS1_EE called 0 returned 0% blocks executed 0%
+    #####:  204:vector<vector<double>> matrixTranspose(vector<vector<double>>& a){
+    #####:  205:    vector<vector<double>> b(a[0].size(), vector<double>(a.size(), 0));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+call    6 never executed
+call    7 never executed
+call    8 never executed
+branch  9 never executed
+branch 10 never executed
+call   11 never executed
+call   12 never executed
+    #####:  206:    for (size_t i = 0; i < a.size(); i++) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  207:        for (size_t j = 0; j < a[0].size(); j++) {
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  208:            b[j][i] = a[i][j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:  209:        }
+        -:  210:    }
+    #####:  211:    return b;
+        -:  212:}
+        -:  213:
+function _Z9read_dataNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEmm called 0 returned 0% blocks executed 0%
+    #####:  214:vector<vector<double>> read_data(string filename, size_t sequence_length, size_t embed_dim) {
+    #####:  215:    ifstream file(filename);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  216:    if (!file.is_open()) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:  217:        cout << "File not found!" << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  218:        return {};
+call    0 never executed
+        -:  219:    }
+    #####:  220:    vector<vector<double>> data;
+call    0 never executed
+    #####:  221:    string line;
+call    0 never executed
+    #####:  222:    while (getline(file, line)) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  223:        stringstream ss(line);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  224:        vector<double> vec(embed_dim, 0);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+    #####:  225:        for (size_t i = 0; i < embed_dim; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  226:            ss >> vec[i];
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  227:        }
+    #####:  228:        if(vec.size() != embed_dim){
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  229:            cout << "Mismatch in sample size. Skipping sample" << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  230:            continue;
+        -:  231:        }
+    #####:  232:        data.push_back(move(vec)); // Use move to avoid copying
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  233:    }
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+call    6 never executed
+call    7 never executed
+    #####:  234:    return data;
+call    0 never executed
+    #####:  235:}
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+        -:  236:
+function _Z23get_positional_encodingmm called 0 returned 0% blocks executed 0%
+    #####:  237:vector<vector<double>> get_positional_encoding(size_t sequence_length, size_t d_model) {
+    #####:  238:    vector<vector<double>> positional_encodings(sequence_length, vector<double>(d_model, 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+    #####:  239:    for (size_t pos = 0; pos < sequence_length; pos++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  240:        for (size_t i = 0; i < d_model; i++) {
+branch  0 never executed
+branch  1 never executed
+    #####:  241:            if (i % 2 == 0) {
+branch  0 never executed
+branch  1 never executed
+    #####:  242:                positional_encodings[pos][i] = sin(pos / pow(10000, (double)i / d_model));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+        -:  243:            } else {
+    #####:  244:                positional_encodings[pos][i] = cos(pos / pow(10000, (double)(i - 1) / d_model));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+        -:  245:            }
+        -:  246:        }
+        -:  247:    }
+    #####:  248:    return positional_encodings;
+        -:  249:}
+        -:  250:
+function _Z11add_vectorsRSt6vectorIS_IdSaIdEESaIS1_EES4_ called 0 returned 0% blocks executed 0%
+    #####:  251:vector<vector<double>> add_vectors(vector<vector<double>>& a, vector<vector<double>>& b) {
+    #####:  252:    vector<vector<double>> c(a.size(), vector<double>(a[0].size(), 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+call    7 never executed
+call    8 never executed
+branch  9 never executed
+branch 10 never executed
+call   11 never executed
+call   12 never executed
+    #####:  253:    for (size_t i = 0; i < a.size(); i++) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  254:        for (size_t j = 0; j < a[0].size(); j++) {
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  255:            c[i][j] = a[i][j] + b[i][j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+        -:  256:        }
+        -:  257:    }
+    #####:  258:    return c;
+        -:  259:}
+        -:  260:
+function _Z10layer_normRSt6vectorIS_IdSaIdEESaIS1_EERS1_S5_f called 0 returned 0% blocks executed 0%
+    #####:  261:vector<vector<double>> layer_norm(vector<vector<double>>& input, vector<double>& gamma, vector<double>& beta, float epsilon = 1e-6) {
+    #####:  262:    size_t seq_len = input.size();
+call    0 never executed
+    #####:  263:    size_t dim = input[0].size();
+call    0 never executed
+call    1 never executed
+    #####:  264:    vector<vector<double>> output(seq_len, vector<double>(dim, 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+        -:  265:
+    #####:  266:    for (size_t i = 0; i < seq_len; ++i) {
+branch  0 never executed
+branch  1 never executed
+    #####:  267:        double mean = 0.0f;
+    #####:  268:        for (auto val : input[i]) mean += val;
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  269:        mean /= dim;
+        -:  270:
+    #####:  271:        double var = 0.0f;
+    #####:  272:        for (double val : input[i]) var += (val - mean) * (val - mean);
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  273:        var /= dim;
+        -:  274:
+    #####:  275:        for (size_t j = 0; j < dim; ++j) {
+branch  0 never executed
+branch  1 never executed
+    #####:  276:            output[i][j] = gamma[j] * ((input[i][j] - mean) / sqrt(var + epsilon)) + beta[j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+        -:  277:        }
+        -:  278:    }
+    #####:  279:    return output;
+        -:  280:}
+        -:  281:
+        -:  282:class EncoderLayer {
+        -:  283:    public:
+        -:  284:        size_t d_model;
+        -:  285:        size_t num_heads;
+        -:  286:        size_t ff_d;
+        -:  287:
+        -:  288:        MultiHeadAttention mha;
+        -:  289:        FeedForward ff;
+        -:  290:        
+        -:  291:        vector<double> beta;
+        -:  292:        vector<double> gamma;
+        -:  293:        
+function _ZN12EncoderLayerC2Emmm called 0 returned 0% blocks executed 0%
+    #####:  294:        EncoderLayer(size_t d_model, size_t num_heads, size_t ff_d) : d_model(d_model), num_heads(num_heads), ff_d(ff_d), mha(d_model, num_heads), ff(d_model, ff_d) {
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+call    5 never executed
+    #####:  295:            beta = vector<double>(d_model, 0.0f);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+    #####:  296:            gamma = vector<double>(d_model, 1.0f);
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+    #####:  297:        }
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:  298:
+function _ZN12EncoderLayer7forwardERSt6vectorIS0_IdSaIdEESaIS2_EE called 0 returned 0% blocks executed 0%
+    #####:  299:        vector<vector<double>> forward(vector<vector<double>>& x) {
+    #####:  300:            vector<vector<double>> attn_output = mha.forward(x);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  301:
+    #####:  302:            vector<vector<double>> addLayer1 = add_vectors(x, attn_output);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  303:            vector<vector<double>> norm1 = layer_norm(addLayer1, gamma, beta, 1e-6);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  304:
+    #####:  305:            vector<vector<double>> ff_output = ff.forward(norm1);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  306:
+    #####:  307:            vector<vector<double>> addLayer2 = add_vectors(norm1, ff_output);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  308:            vector<vector<double>> norm2 = layer_norm(addLayer2, gamma, beta);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  309:
+    #####:  310:            return norm2;
+    #####:  311:        }
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+call    8 never executed
+call    9 never executed
+        -:  312:};
+        -:  313:
+function main called 0 returned 0% blocks executed 0%
+    #####:  314:int main() {
+        -:  315:
+        -:  316:    // transformer parameters
+    #####:  317:    size_t d_model = 500;
+    #####:  318:    size_t embed_dim = 500;
+    #####:  319:    size_t sequence_length = 100;
+    #####:  320:    size_t num_heads = 50;
+    #####:  321:    size_t ff_dim = 1280;
+        -:  322:
+    #####:  323:    string input_file = "dataset_vectors.txt";
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  324:
+    #####:  325:    cout << "Loading the data from the file..." << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  326:
+    #####:  327:    vector<vector<double>> input_vectors = read_data(input_file, sequence_length, embed_dim);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  328:    if(input_vectors.empty()){
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  329:        cout << "No data found in the file. Exiting..." << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  330:        return 1;
+        -:  331:    }
+    #####:  332:    cout << "Data read successfully with sequence length "<< input_vectors.size() << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+call    7 never executed
+branch  8 never executed
+branch  9 never executed
+        -:  333:
+    #####:  334:    vector<double> sample = input_vectors[0];
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  335:    vector<vector<double>> sample_vector(sequence_length, vector<double>(embed_dim, 0.0f));
+call    0 never executed
+call    1 never executed
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+call    5 never executed
+branch  6 never executed
+branch  7 never executed
+call    8 never executed
+call    9 never executed
+        -:  336:
+    #####:  337:    for(size_t i = 0; i< sequence_length; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  338:        for(size_t j = 0; j < embed_dim; j++){
+branch  0 never executed
+branch  1 never executed
+    #####:  339:            sample_vector[i][j] = sample[i*embed_dim + j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+        -:  340:        }
+        -:  341:    }
+        -:  342:
+    #####:  343:    vector<vector<double>> positional_encodings = get_positional_encoding(sequence_length, d_model);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  344:    
+    #####:  345:    for(size_t i = 0; i < sequence_length; i++){
+branch  0 never executed
+branch  1 never executed
+    #####:  346:        for(size_t j = 0; j < d_model; j++){
+branch  0 never executed
+branch  1 never executed
+    #####:  347:            sample_vector[i][j] += positional_encodings[i][j];
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+        -:  348:        }
+        -:  349:    }
+        -:  350:
+    #####:  351:    EncoderLayer encoder_layer(d_model, num_heads, ff_dim);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  352:    vector<vector<double>> encoder_output = encoder_layer.forward(sample_vector);
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  353:
+    #####:  354:    cout << "Output after input data is passed through the transformer : " << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  355:    ofstream outputFile("output.txt");
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  356:
+    #####:  357:    for(auto row : encoder_output){
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+call    6 never executed
+call    7 never executed
+branch  8 never executed
+branch  9 never executed
+    #####:  358:        for(auto val : row){
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  359:            outputFile << val << " ";
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  360:            cout << val << " ";
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  361:        }
+    #####:  362:        cout << endl;
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  363:    }
+call    0 never executed
+call    1 never executed
+        -:  364:
+    #####:  365:    return 0;
+    #####:  366:}
+call    0 never executed
+call    1 never executed
+call    2 never executed
+call    3 never executed
+call    4 never executed
+call    5 never executed
+call    6 never executed
+call    7 never executed
+call    8 never executed
+call    9 never executed
+call   10 never executed
+call   11 never executed
+call   12 never executed
+call   13 never executed
+call   14 never executed
+call   15 never executed

@@ -1,0 +1,4 @@
+/opt/AMDuProf_5.0-1479/bin/AMDuProf
+Info: If you experience a black window without any GUI elements on launch, please launch as:
+export AMDUPROF_GUI_WORKAROUND=1 && ./AMDuProf
+Unrecognized option! Run AMDuProf --help to see valid options.

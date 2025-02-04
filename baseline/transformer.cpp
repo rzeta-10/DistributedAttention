@@ -1,6 +1,20 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// This block enables compilation of the code with and without LIKWID in place
+#ifdef LIKWID_PERFMON
+#include <likwid-marker.h>
+#else
+#define LIKWID_MARKER_INIT
+#define LIKWID_MARKER_THREADINIT
+#define LIKWID_MARKER_SWITCH
+#define LIKWID_MARKER_REGISTER(regionTag)
+#define LIKWID_MARKER_START(regionTag)
+#define LIKWID_MARKER_STOP(regionTag)
+#define LIKWID_MARKER_CLOSE
+#define LIKWID_MARKER_GET(regionTag, nevents, events, time, count)
+#endif
+
 vector<vector<double>> concatenate_heads(vector<vector<double>>&, size_t, size_t, size_t);
 void add_bias(vector<vector<double>>&, vector<double>&);
 vector<vector<double>> genRandomMatrix(size_t, size_t);
@@ -312,6 +326,9 @@ class EncoderLayer {
 };
 
 int main() {
+    // // Initialize LIKWID markers
+    LIKWID_MARKER_INIT;
+    LIKWID_MARKER_THREADINIT;
 
     // transformer parameters
     size_t d_model = 500;
@@ -329,7 +346,7 @@ int main() {
         cout << "No data found in the file. Exiting..." << endl;
         return 1;
     }
-    cout << "Data read successfully with size "<< input_vectors.size() << endl;
+    cout << "Data read successfully with sequence length "<< input_vectors.size() << endl;
 
     vector<double> sample = input_vectors[0];
     vector<vector<double>> sample_vector(sequence_length, vector<double>(embed_dim, 0.0f));
@@ -349,7 +366,14 @@ int main() {
     }
 
     EncoderLayer encoder_layer(d_model, num_heads, ff_dim);
+
+    // Start LIKWID marker region
+    LIKWID_MARKER_START("encoder_forward");
+
     vector<vector<double>> encoder_output = encoder_layer.forward(sample_vector);
+
+    // Stop LIKWID marker region
+    LIKWID_MARKER_STOP("encoder_forward");
 
     cout << "Output after input data is passed through the transformer : " << endl;
     ofstream outputFile("output.txt");
@@ -361,6 +385,9 @@ int main() {
         }
         cout << endl;
     }
+
+    // Close LIKWID markers
+    LIKWID_MARKER_CLOSE;
 
     return 0;
 }

@@ -1,10 +1,10 @@
-        -:    0:Source:/usr/include/c++/13/bits/stl_iterator_base_types.h
+        -:    0:Source:/usr/include/c++/11/bits/stl_iterator_base_types.h
         -:    0:Graph:transformer.gcno
         -:    0:Data:transformer.gcda
         -:    0:Runs:1
         -:    1:// Types used in iterator implementation -*- C++ -*-
         -:    2:
-        -:    3:// Copyright (C) 2001-2023 Free Software Foundation, Inc.
+        -:    3:// Copyright (C) 2001-2021 Free Software Foundation, Inc.
         -:    4://
         -:    5:// This file is part of the GNU ISO C++ Library.  This library is free
         -:    6:// software; you can redistribute it and/or modify it under the
@@ -128,7 +128,7 @@
         -:  124:  */
         -:  125:  template<typename _Category, typename _Tp, typename _Distance = ptrdiff_t,
         -:  126:           typename _Pointer = _Tp*, typename _Reference = _Tp&>
-        -:  127:    struct _GLIBCXX17_DEPRECATED iterator
+        -:  127:    struct iterator
         -:  128:    {
         -:  129:      /// One of the @link iterator_tags tag types@endlink.
         -:  130:      typedef _Category  iterator_category;
@@ -237,40 +237,55 @@
         -:  233:   *  sugar for internal library use only.
         -:  234:  */
         -:  235:  template<typename _Iter>
-        -:  236:    __attribute__((__always_inline__))
-        -:  237:    inline _GLIBCXX_CONSTEXPR
-        -:  238:    typename iterator_traits<_Iter>::iterator_category
-        -:  239:    __iterator_category(const _Iter&)
-    1177*:  240:    { return typename iterator_traits<_Iter>::iterator_category(); }
-        -:  241:
-        -:  242:  ///@}
-        -:  243:
-        -:  244:#if __cplusplus >= 201103L
-        -:  245:  template<typename _Iter>
-        -:  246:    using __iter_category_t
-        -:  247:      = typename iterator_traits<_Iter>::iterator_category;
-        -:  248:
-        -:  249:  template<typename _InIter>
-        -:  250:    using _RequireInputIter =
-        -:  251:      __enable_if_t<is_convertible<__iter_category_t<_InIter>,
-        -:  252:				   input_iterator_tag>::value>;
-        -:  253:
-        -:  254:  template<typename _It,
-        -:  255:	   typename _Cat = __iter_category_t<_It>>
-        -:  256:    struct __is_random_access_iter
-        -:  257:      : is_base_of<random_access_iterator_tag, _Cat>
-        -:  258:    {
-        -:  259:      typedef is_base_of<random_access_iterator_tag, _Cat> _Base;
-        -:  260:      enum { __value = _Base::value };
-        -:  261:    };
-        -:  262:#else
-        -:  263:  template<typename _It, typename _Traits = iterator_traits<_It>,
-        -:  264:	   typename _Cat = typename _Traits::iterator_category>
-        -:  265:    struct __is_random_access_iter
-        -:  266:    { enum { __value = __is_base_of(random_access_iterator_tag, _Cat) }; };
-        -:  267:#endif
-        -:  268:
-        -:  269:_GLIBCXX_END_NAMESPACE_VERSION
-        -:  270:} // namespace
-        -:  271:
-        -:  272:#endif /* _STL_ITERATOR_BASE_TYPES_H */
+        -:  236:    inline _GLIBCXX_CONSTEXPR
+        -:  237:    typename iterator_traits<_Iter>::iterator_category
+     277*:  238:    __iterator_category(const _Iter&)
+     277*:  239:    { return typename iterator_traits<_Iter>::iterator_category(); }
+------------------
+_ZSt19__iterator_categoryIPdENSt15iterator_traitsIT_E17iterator_categoryERKS2_:
+function _ZSt19__iterator_categoryIPdENSt15iterator_traitsIT_E17iterator_categoryERKS2_ called 276 returned 100% blocks executed 100%
+      276:  238:    __iterator_category(const _Iter&)
+      276:  239:    { return typename iterator_traits<_Iter>::iterator_category(); }
+------------------
+_ZSt19__iterator_categoryIPcENSt15iterator_traitsIT_E17iterator_categoryERKS2_:
+function _ZSt19__iterator_categoryIPcENSt15iterator_traitsIT_E17iterator_categoryERKS2_ called 0 returned 0% blocks executed 0%
+    #####:  238:    __iterator_category(const _Iter&)
+    #####:  239:    { return typename iterator_traits<_Iter>::iterator_category(); }
+------------------
+_ZSt19__iterator_categoryIPKcENSt15iterator_traitsIT_E17iterator_categoryERKS3_:
+function _ZSt19__iterator_categoryIPKcENSt15iterator_traitsIT_E17iterator_categoryERKS3_ called 1 returned 100% blocks executed 100%
+        1:  238:    __iterator_category(const _Iter&)
+        1:  239:    { return typename iterator_traits<_Iter>::iterator_category(); }
+------------------
+        -:  240:
+        -:  241:  ///@}
+        -:  242:
+        -:  243:#if __cplusplus >= 201103L
+        -:  244:  template<typename _Iter>
+        -:  245:    using __iterator_category_t
+        -:  246:      = typename iterator_traits<_Iter>::iterator_category;
+        -:  247:
+        -:  248:  template<typename _InIter>
+        -:  249:    using _RequireInputIter =
+        -:  250:      __enable_if_t<is_convertible<__iterator_category_t<_InIter>,
+        -:  251:				   input_iterator_tag>::value>;
+        -:  252:
+        -:  253:  template<typename _It,
+        -:  254:	   typename _Cat = __iterator_category_t<_It>>
+        -:  255:    struct __is_random_access_iter
+        -:  256:      : is_base_of<random_access_iterator_tag, _Cat>
+        -:  257:    {
+        -:  258:      typedef is_base_of<random_access_iterator_tag, _Cat> _Base;
+        -:  259:      enum { __value = _Base::value };
+        -:  260:    };
+        -:  261:#else
+        -:  262:  template<typename _It, typename _Traits = iterator_traits<_It>,
+        -:  263:	   typename _Cat = typename _Traits::iterator_category>
+        -:  264:    struct __is_random_access_iter
+        -:  265:    { enum { __value = __is_base_of(random_access_iterator_tag, _Cat) }; };
+        -:  266:#endif
+        -:  267:
+        -:  268:_GLIBCXX_END_NAMESPACE_VERSION
+        -:  269:} // namespace
+        -:  270:
+        -:  271:#endif /* _STL_ITERATOR_BASE_TYPES_H */
