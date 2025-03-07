@@ -1,3 +1,4 @@
 .vscode/
 *.pdf
 *.odt
+openmp/dataset_vectors.txt
