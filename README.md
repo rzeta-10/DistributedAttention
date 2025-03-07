@@ -4,7 +4,7 @@
 
 ## 📌 Project Status 
 - ✅ **Baseline Transformer & Profiling** - Completed
-- ⏳ **OpenMP Optimization** - In Progress
+- ✅ **OpenMP Optimization** - In Progress
 - ⏳ **MPI Optimization** - In Progress
 - ⏳ **CUDA Optimization** - In Progress
 
@@ -125,7 +125,7 @@ dot -Tpng output.dot -o output.png
 ## 📜 Roadmap
 
 ✅ Implement baseline Transformer 🔹 **Done**  
-🔜 OpenMP parallelization 🔹 **In Progress**  
+✅ OpenMP parallelization 🔹 **In Progress**  
 🔜 MPI distributed optimization 🔹 **In Progress**  
 🔜 CUDA acceleration 🔹 **In Progress**  
 
